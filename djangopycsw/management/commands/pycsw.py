@@ -9,6 +9,8 @@ from django.conf import settings as django_settings
 from pycsw.core import admin
 from pycsw.core.config import StaticContext
 
+from djangopycsw.pycswsettings import build_pycsw_settings
+
 
 class PycswAdminHandler(object):
     config = None
@@ -264,8 +266,8 @@ class Command(BaseCommand):
         return parser
 
     def handle(self, *args, **options):
-        self.pycsw_admin_handler.parse_configuration(
-            django_settings.PYCSW_CONFIG)
+        pycsw_config = build_pycsw_settings()
+        self.pycsw_admin_handler.parse_configuration(pycsw_config)
         ArgsObject = namedtuple("ArgsObject", options.keys())
         the_args = ArgsObject(**options)
         the_args.func(the_args)

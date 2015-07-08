@@ -2,14 +2,17 @@ from __future__ import absolute_import
 from collections import namedtuple
 import argparse
 import ConfigParser
+import logging
 
 from django.core.management.base import BaseCommand
-from django.conf import settings as django_settings
-
 from pycsw.core import admin
 from pycsw.core.config import StaticContext
 
-from djangopycsw.pycswsettings import build_pycsw_settings
+from ...pycswsettings import build_pycsw_settings
+from ... import mappings
+from ... import events
+
+logger = logging.getLogger(__name__)
 
 
 class PycswAdminHandler(object):
@@ -19,6 +22,8 @@ class PycswAdminHandler(object):
 
     def __init__(self):
         self.config = None
+        self.context.md_core_model = mappings.MD_CORE_MODEL
+        self.context.refresh_dc(mappings.MD_CORE_MODEL)
 
     def parse_configuration(self, config):
         self.config = ConfigParser.SafeConfigParser(self.config_defaults)
@@ -82,11 +87,11 @@ class PycswAdminHandler(object):
             description="PyCSW command-line configuration tool")
         #parser.add_argument("-v", "--verbose", action="store_true",
         #                    help="Be verbose about the output")
-        parser.add_argument(
-            "-c", "--config",
-            help="Filepath to pycsw configuration. Alternatively, you "
-                 "can set the PYCSW_CONFIG environment variable"
-        )
+        #parser.add_argument(
+        #    "-c", "--config",
+        #    help="Filepath to pycsw configuration. Alternatively, you "
+        #         "can set the PYCSW_CONFIG environment variable"
+        #)
         subparsers = parser.add_subparsers(title="Available commands")
         self._add_db_parser(subparsers)
         self._add_load_parser(subparsers)
@@ -242,11 +247,12 @@ class Command(BaseCommand):
         parser.add_argument('--version', action='version',
                            version=self.get_version())
         parser.add_argument('-v', '--verbosity', action='store',
-                            dest='verbosity', default='1',
+                            dest='verbosity', default=1,
                             type=int, choices=[0, 1, 2, 3],
                             help='Verbosity level; 0=minimal output, '
                                  '1=normal output, 2=verbose output, '
-                                 '3=very verbose output')
+                                 '3=very verbose output. Defaults to '
+                                 '%(default)s')
         parser.add_argument(
             '--settings',
             help='The Python path to a settings module, e.g. '
@@ -266,6 +272,15 @@ class Command(BaseCommand):
         return parser
 
     def handle(self, *args, **options):
+        log_level = {
+            0: logging.ERROR,
+            1: logging.WARNING,
+            2: logging.INFO,
+            3: logging.DEBUG
+        }.get(options["verbosity"])
+        logger.setLevel(log_level)
+        pycsw_logger = logging.getLogger("pycsw")
+        pycsw_logger.setLevel(log_level)
         pycsw_config = build_pycsw_settings()
         self.pycsw_admin_handler.parse_configuration(pycsw_config)
         ArgsObject = namedtuple("ArgsObject", options.keys())

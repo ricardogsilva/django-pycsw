@@ -10,12 +10,13 @@ class CollaboratorInline(admin.StackedInline):
 
 @admin.register(models.Record)
 class RecordAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("identifier", "title",)
 
 
 @admin.register(models.Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     inlines = [CollaboratorInline,]
+
 
 @admin.register(models.PycswConfig)
 class PycswConfigAdmin(admin.ModelAdmin):

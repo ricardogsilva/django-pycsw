@@ -22,7 +22,6 @@ class CswEndpoint(View):
         server.request = "http://{}{}".format(get_current_site(request),
                                               reverse("csw_endpoint"))
         server.requesttype = request.method
-        #server.kvp = request.GET
         server.kvp = self._normalize_params(request.GET)
         print("server.iface: {}".format(server.iface))
         print("server.kvp: {}".format(server.kvp))
@@ -49,6 +48,7 @@ class CswEndpoint(View):
         server.dispatch_wsgi() methods, we need to explicitly do the same
         here, as we are bypassing these methods and calling server.dispatch()
         """
+
         kvp = dict()
         for k, v in query_dict.iteritems():
             kvp[k.lower()] = v

@@ -18,14 +18,12 @@ logger = logging.getLogger(__name__)
 class PycswAdminHandler(object):
     config = None
     config_defaults = {"table": "records",}
-    context = StaticContext()
 
     def __init__(self):
         self.config = None
-        self.context.md_core_model = mappings.MD_CORE_MODEL
-        self.context.refresh_dc(mappings.MD_CORE_MODEL)
+        self.context = None
 
-    def parse_configuration(self, config):
+    def parse_configuration(self, config, context):
         self.config = ConfigParser.SafeConfigParser(self.config_defaults)
         if isinstance(config, str):
             self.config.readfp(open(config))
@@ -34,6 +32,9 @@ class PycswAdminHandler(object):
                 self.config.add_section(section)
                 for k, v in options.iteritems():
                     self.config.set(section, k, v)
+        self.context = context
+        self.context.md_core_model = mappings.MD_CORE_MODEL
+        self.context.refresh_dc(mappings.MD_CORE_MODEL)
 
     def handle_db(self, args):
         database, table = self._get_db_settings()
@@ -74,10 +75,10 @@ class PycswAdminHandler(object):
         admin.gen_sitemap(self.context, database, table, url, args.output_path)
 
     def handle_post(self, args):
-        print(admin.post_xml(args.url, args.xml, args.timeout))
+        return admin.post_xml(args.url, args.xml, args.timeout)
 
     def handle_dependencies(self, args):
-        print(admin.get_sysprof())
+        return admin.get_sysprof()
 
     def handle_validate(self, args):
         admin.validate_xml(args.xml, args.xml_schema)
@@ -282,7 +283,10 @@ class Command(BaseCommand):
         pycsw_logger = logging.getLogger("pycsw")
         pycsw_logger.setLevel(log_level)
         pycsw_config = build_pycsw_settings()
-        self.pycsw_admin_handler.parse_configuration(pycsw_config)
+        context = StaticContext()
+        self.pycsw_admin_handler.parse_configuration(pycsw_config, context)
         ArgsObject = namedtuple("ArgsObject", options.keys())
         the_args = ArgsObject(**options)
-        the_args.func(the_args)
+        result = the_args.func(the_args)
+        self.stdout.write(result)
+        self.stdout.write("Done!")

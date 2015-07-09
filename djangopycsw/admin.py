@@ -10,7 +10,8 @@ class CollaboratorInline(admin.StackedInline):
 
 @admin.register(models.Record)
 class RecordAdmin(admin.ModelAdmin):
-    list_display = ("identifier", "title",)
+    list_display = ("id", "identifier", "title", "temporal_extent_begin",)
+    date_hierarchy = "temporal_extent_begin"
 
 
 @admin.register(models.Organization)

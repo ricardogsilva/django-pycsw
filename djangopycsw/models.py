@@ -12,6 +12,18 @@ Testing can be done on the command line using httpie:
        Outputschema==http://www.isotc211.org/2005/gmd \
        | less -R
 
+Or with the browser and GET requests:
+
+http://localhost:8000/csw/server/?
+    SERVICE=CSW&version=2.0.2&
+    REQUEST=GetRecords&
+    resultType=results&
+    constraintLanguage=CQL_TEXT&
+    constraint_language_version=1.1.0&
+    constraint=TempExtent_begin%20%3E=%20%272014-10-12T00:00:00Z%27&
+    elementSetName=full&
+    outputSchema=http://www.isotc211.org/2005/gmd&
+    typenames=gmd:MD_Metadata
 
 """
 

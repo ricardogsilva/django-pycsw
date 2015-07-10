@@ -201,7 +201,7 @@ class Record(models.Model):
         help_text='Maps to pycsw:DistanceValue'
     )
     distance_uom = models.CharField(
-        max_length=30, null=True, blank=True,
+        max_length=200, null=True, blank=True,
         help_text='Maps to pycsw:DistanceUOM'
     )
     temporal_extent_begin = models.DateTimeField(
@@ -234,21 +234,21 @@ class Record(models.Model):
     )
     degree = models.CharField(max_length=255, null=True, blank=True,
                               help_text='Maps to pycsw:Degree')
-    access_constraints = models.CharField(
-        max_length=255, null=True, blank=True,
+    access_constraints = models.TextField(
+        null=True, blank=True,
         help_text='Maps to pycsw:AccessConstraints'
     )
-    other_constraints = models.CharField(
-        max_length=255, null=True, blank=True,
+    other_constraints = models.TextField(
+        null=True, blank=True,
         help_text='Maps to pycsw:OtherConstraints'
     )
     classification = models.CharField(max_length=255, null=True, blank=True,
                                       help_text='Maps to pycsw:Classification')
-    condition_applying_to_access_and_use = models.CharField(
-        max_length=255, null=True, blank=True,
+    condition_applying_to_access_and_use = models.TextField(
+        null=True, blank=True,
         help_text='Maps to pycsw:ConditionApplyingToAccessAndUse'
     )
-    lineage = models.CharField(max_length=255, null=True, blank=True,
+    lineage = models.TextField(null=True, blank=True,
                                help_text='Maps to pycsw:Lineage')
     responsible_party_role = models.CharField(
         max_length=255, null=True, blank=True,

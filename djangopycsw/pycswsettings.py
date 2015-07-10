@@ -17,11 +17,14 @@ def build_pycsw_settings():
                                reverse("csw_endpoint"))
     poc = config.point_of_contact
     org = poc.organization
-    db_engine = {
-        "django.db.backends.sqlite3": "sqlite:///",
-    }.get(settings.DATABASES["default"]["ENGINE"])
-    db_connection = "{}{}".format(db_engine,
-                                  settings.DATABASES["default"]["NAME"])
+    django_db = settings.DATABASES["default"]
+    db_connection = {
+        "django.db.backends.sqlite3": "sqlite:///{}".format(django_db["NAME"]),
+        "django.contrib.gis.db.backends.postgis":
+            "postgresql://{}:{}@localhost/{}".format(django_db["USER"],
+                                                     django_db["PASSWORD"],
+                                                     django_db["NAME"])
+    }.get(django_db["ENGINE"])
     mappings_path = os.path.join(apps.get_app_config("djangopycsw").path,
                                  "mappings.py")
     # the values must be strings because PYCSW will feed this dict

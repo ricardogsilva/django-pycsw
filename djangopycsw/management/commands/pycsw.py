@@ -10,7 +10,7 @@ from pycsw.core.config import StaticContext
 
 from ...pycswsettings import build_pycsw_settings
 from ... import mappings
-from ... import events
+#from ... import events  # relying on custom pycsw branch
 
 logger = logging.getLogger(__name__)
 
@@ -288,5 +288,6 @@ class Command(BaseCommand):
         ArgsObject = namedtuple("ArgsObject", options.keys())
         the_args = ArgsObject(**options)
         result = the_args.func(the_args)
-        self.stdout.write(result)
+        if result is not None:
+            self.stdout.write(result)
         self.stdout.write("Done!")

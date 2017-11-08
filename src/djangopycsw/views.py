@@ -8,7 +8,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from lxml import etree
 from pycsw.server import Csw
 
-from .pycswsettings import build_pycsw_settings
+from .pycswsettings import get_pycsw_settings
 
 import logging
 
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 class CswEndpoint(View):
 
     def get(self, request):
-        pycsw_settings = build_pycsw_settings()
+        pycsw_settings = get_pycsw_settings()
         server = Csw(rtconfig=pycsw_settings, env=request.META.copy(),
                      version=request.GET["version"])
         server.request = "http://{}{}".format(get_current_site(request),
                                               reverse("csw_endpoint"))
         server.requesttype = request.method
-        server.kvp = self._normalize_params(request.GET)
+        server.kvp = request.GET
         status_code, response = server.dispatch()
         return HttpResponse(response, status=status_code,
                             content_type="application/xml")
@@ -35,7 +35,7 @@ class CswEndpoint(View):
         return super(CswEndpoint, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        pycsw_settings = build_pycsw_settings()
+        pycsw_settings = get_pycsw_settings()
         server = Csw(rtconfig=pycsw_settings, env=request.META.copy(),
                      version=self._get_post_version(request.body))
         logger.info(request.body)
@@ -44,24 +44,4 @@ class CswEndpoint(View):
         status_code, response = server.dispatch()
         return HttpResponse(response, status=status_code,
                             content_type="application/xml")
-
-    # TODO - Remove this method once pycsw mainlines the pending pull request
-    def _normalize_params(self, query_dict):
-        """
-        A hack to overcome PyCSW's early normalizing of KVP args.
-
-        Since PyCSW normalizes KVP args in the server.dispatch_cgi() and
-        server.dispatch_wsgi() methods, we need to explicitly do the same
-        here, as we are bypassing these methods and calling server.dispatch()
-        """
-
-        kvp = dict()
-        for k, v in query_dict.iteritems():
-            kvp[k.lower()] = v
-        return kvp
-
-    def _get_post_version(self, raw_request):
-        exml = etree.fromstring(raw_request)
-        return exml.get("version")
-
 

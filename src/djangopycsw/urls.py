@@ -4,5 +4,5 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
-    url(r'^server/$', views.CswEndpoint.as_view(), name="csw_endpoint")
+    url(r'^/$', views.CswEndpoint.as_view(), name="csw_endpoint")
 ]
